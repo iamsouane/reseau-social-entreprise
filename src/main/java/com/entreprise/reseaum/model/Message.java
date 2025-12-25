@@ -19,7 +19,7 @@ public class Message {
 	private LocalDateTime date = LocalDateTime.now();
 	private boolean lu = false;
 
-	// ✅ SETTERS MANUELS
+	// SETTERS
 	public void setSender(User sender) {
 		this.sender = sender;
 	}
@@ -32,11 +32,15 @@ public class Message {
 		this.contenu = contenu;
 	}
 
+	public void setDate(LocalDateTime date) {
+		this.date = date;
+	}
+
 	public void setLu(boolean lu) {
 		this.lu = lu;
 	}
 
-	// ✅ GETTERS MANUELS
+	// GETTERS
 	public Long getId() {
 		return id;
 	}

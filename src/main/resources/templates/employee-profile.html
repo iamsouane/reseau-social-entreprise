@@ -9,24 +9,20 @@
 </head>
 
 <body class="bg-light">
-	<!-- NAVBAR HARMONISÉE + MESSAGERIE -->
+	<!-- NAVBAR HARMONISÉE -->
 	<nav class="navbar navbar-expand-lg navbar-dark bg-primary py-3">
 		<div class="container">
-			<!-- BOUTON RETOUR PRÉCÉDENT -->
-			<a href="javascript:history.back()" class="btn btn-outline-light btn-lg px-4 me-3 shadow">
-				<i class="bi bi-arrow-left-circle fs-5 me-2"></i>Précédent
-			</a>
-
+			<!-- NOM USER CONNECTÉ -->
+			<span class="navbar-text fw-bold fs-5 me-auto" th:text="${user.prenom + ' ' + user.nom}">Ismaila</span>
 			<!-- BRAND -->
 			<a class="navbar-brand fw-bold mx-auto flex-fill text-center" href="/">🏢 Réseau Entreprise</a>
-
-			<!-- ACTIONS EMPLOYÉ -->
+			<!-- ACTIONS -->
 			<div class="d-flex">
-				<a th:href="@{/employee/messages}" class="btn btn-info btn-lg px-4 me-2 shadow">
-					<i class="bi bi-chat-dots me-2"></i>💬 Messagerie
+				<a th:href="@{/employee/messages}" class="btn btn-outline-light btn-lg px-4 me-2 shadow">
+					<i class="bi bi-chat-dots me-2"></i>Messagerie
 				</a>
 				<a th:href="@{/employee/logout}" class="btn btn-outline-light btn-lg px-4 shadow">
-					<i class="bi bi-box-arrow-right me-2"></i>🔓 Déconnexion
+					<i class="bi bi-box-arrow-right me-2"></i>Déconnexion
 				</a>
 			</div>
 		</div>
@@ -51,8 +47,8 @@
 								<p class="lead" th:text="${user.bio}">Bio / Description...</p>
 							</div>
 							<div class="col-md-4 text-center">
-								<span th:if="${user.actif}" class="badge bg-success fs-5 px-4 py-3">✅ Actif</span>
-								<span th:unless="${user.actif}" class="badge bg-warning fs-5 px-4 py-3">⏳ En
+								<span th:if="${user.actif}" class="badge bg-success fs-5 px-4 py-3">Actif</span>
+								<span th:unless="${user.actif}" class="badge bg-warning fs-5 px-4 py-3">En
 									attente</span>
 							</div>
 						</div>
@@ -60,10 +56,10 @@
 						<!-- BOUTONS ACTIONS -->
 						<div class="d-flex gap-3 justify-content-center">
 							<button id="editBtn" class="btn btn-primary btn-lg px-4 py-3 shadow">
-								<i class="bi bi-pencil-square me-2"></i>✏️ Modifier
+								<i class="bi bi-pencil-square me-2"></i>Modifier
 							</button>
 							<a th:href="@{/employee/dashboard}" class="btn btn-outline-primary btn-lg px-4 py-3 shadow">
-								<i class="bi bi-house-door me-2"></i>🏠 Dashboard
+								<i class="bi bi-house-door me-2"></i>Dashboard
 							</a>
 						</div>
 					</div>
@@ -73,7 +69,7 @@
 				<div id="editMode" class="card shadow-lg border-0" style="display: none;">
 					<div class="card-header bg-warning text-dark py-4">
 						<h3 class="mb-0 fw-bold">
-							<i class="bi bi-pencil-square fs-3 me-3"></i>✏️ Modifier Profil
+							<i class="bi bi-pencil-square fs-3 me-3"></i>Modifier Profil
 						</h3>
 					</div>
 					<div class="card-body p-5">
@@ -81,29 +77,29 @@
 							<input type="hidden" th:field="*{id}">
 							<div class="row mb-4">
 								<div class="col-md-6">
-									<label class="form-label fw-bold fs-6 mb-2">✏️ Prénom</label>
+									<label class="form-label fw-bold fs-6 mb-2">Prénom</label>
 									<input type="text" th:field="*{prenom}" class="form-control form-control-lg"
 										required>
 								</div>
 								<div class="col-md-6">
-									<label class="form-label fw-bold fs-6 mb-2">👤 Nom</label>
+									<label class="form-label fw-bold fs-6 mb-2">Nom</label>
 									<input type="text" th:field="*{nom}" class="form-control form-control-lg" required>
 								</div>
 							</div>
 							<div class="mb-4">
-								<label class="form-label fw-bold fs-6 mb-2">💼 Poste</label>
+								<label class="form-label fw-bold fs-6 mb-2">Poste</label>
 								<input type="text" th:field="*{poste}" class="form-control form-control-lg"
 									placeholder="Développeur Frontend...">
 							</div>
 							<div class="mb-5">
-								<label class="form-label fw-bold fs-6 mb-2">📝 Bio</label>
+								<label class="form-label fw-bold fs-6 mb-2">Bio</label>
 								<textarea th:field="*{bio}" class="form-control" rows="4"
 									placeholder="Décrivez votre rôle et compétences..."></textarea>
 							</div>
 
 							<div class="d-flex gap-3 justify-content-center">
 								<button type="submit" class="btn btn-success btn-lg px-5 py-3 shadow">
-									<i class="bi bi-check-circle me-2"></i>✅ Enregistrer
+									<i class="bi bi-check-circle me-2"></i>Enregistrer
 								</button>
 								<button type="button" id="cancelBtn"
 									class="btn btn-outline-secondary btn-lg px-5 py-3 shadow">
