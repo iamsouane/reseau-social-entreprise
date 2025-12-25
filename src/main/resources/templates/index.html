@@ -4,78 +4,157 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Réseau Social Entreprise</title>
+	<title th:text="${title}">Réseau Entreprise</title>
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-	<link href="/css/bootstrap-custom.css" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 
-<body>
-	<!-- Navbar -->
-	<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+<body class="bg-light">
+	<!-- NAVBAR HARMONISÉE (comme partout) -->
+	<nav class="navbar navbar-expand-lg navbar-dark bg-primary py-3">
 		<div class="container">
-			<a class="navbar-brand fw-bold" href="/">🏢 Réseau Entreprise</a>
+			<!-- BRAND CENTRE -->
+			<a class="navbar-brand fw-bold mx-auto flex-fill text-center" href="/">🏢 Réseau Entreprise</a>
+
+			<!-- ACTIONS ACCUEIL (btn-lg uniformes) -->
+			<div class="d-flex">
+				<a th:href="@{/employee/login}" class="btn btn-success btn-lg px-4 me-2 shadow">
+					<i class="bi bi-box-arrow-in-right me-2"></i>Se connecter
+				</a>
+				<a th:href="@{/register}" class="btn btn-outline-light btn-lg px-4 me-2 shadow">
+					<i class="bi bi-person-plus me-2"></i>S'inscrire
+				</a>
+				<a th:href="@{/admin/login}" class="btn btn-warning btn-lg px-4 shadow text-dark">
+					<i class="bi bi-shield-check me-2"></i>Admin
+				</a>
+			</div>
 		</div>
 	</nav>
 
-	<!-- Contenu principal -->
 	<div class="container mt-5">
-		<div class="row">
-			<div class="col-md-8">
+		<!-- HERO HARMONISÉ -->
+		<div class="row justify-content-center">
+			<div class="col-lg-10">
 				<div class="card shadow-lg border-0">
-					<div class="card-body p-5">
-						<h1 class="display-4 fw-bold text-primary mb-4" th:text="${title}">Bienvenue !</h1>
-						<p class="lead text-muted mb-5">Réseau social d'entreprise opérationnel 🚀</p>
+					<div class="card-body p-5 text-center">
+						<h1 class="display-4 fw-bold text-primary mb-4" th:text="${title}">Réseau Social Entreprise</h1>
+						<p class="lead fs-4 text-muted mb-5">
+							Utilisateurs: <strong th:text="${userCount}">0</strong> |
+							Système 100% opérationnel 🚀
+						</p>
 
-						<div class="row g-4">
+						<!-- STATS CARDS -->
+						<div class="row g-4 mb-5">
 							<div class="col-md-4">
-								<div class="card h-100 border-primary border-3 shadow">
-									<div class="card-body text-center p-4">
-										<div class="mb-3">
-											<i class="bi bi-people-fill fs-1 text-primary"></i>
-										</div>
-										<h5 class="card-title">👥 Profils</h5>
-										<p class="card-text">Employés & compétences</p>
+								<div class="card h-100 shadow border-primary border-2 bg-primary bg-opacity-10">
+									<div class="card-body p-4 text-center">
+										<i class="bi bi-people-fill fs-2 text-primary mb-3"></i>
+										<h4 class="fw-bold mb-2" th:text="${userCount}">0</h4>
+										<p class="text-primary fw-medium mb-0">Utilisateurs</p>
 									</div>
 								</div>
 							</div>
 							<div class="col-md-4">
-								<div class="card h-100 border-success border-3 shadow">
-									<div class="card-body text-center p-4">
-										<div class="mb-3">
-											<i class="bi bi-chat-dots-fill fs-1 text-success"></i>
-										</div>
-										<h5 class="card-title">💬 Messagerie</h5>
-										<p class="card-text">WebSocket realtime</p>
+								<div class="card h-100 shadow border-success border-2 bg-success bg-opacity-10">
+									<div class="card-body p-4 text-center">
+										<i class="bi bi-chat-dots-fill fs-2 text-success mb-3"></i>
+										<h4 class="fw-bold mb-2">Realtime</h4>
+										<p class="text-success fw-medium mb-0">Messagerie</p>
 									</div>
 								</div>
 							</div>
 							<div class="col-md-4">
-								<div class="card h-100 border-info border-3 shadow">
-									<div class="card-body text-center p-4">
-										<div class="mb-3">
-											<i class="bi bi-search fs-1 text-info"></i>
-										</div>
-										<h5 class="card-title">🔍 Recherche</h5>
-										<p class="card-text">Elasticsearch puissant</p>
+								<div class="card h-100 shadow border-info border-2 bg-info bg-opacity-10">
+									<div class="card-body p-4 text-center">
+										<i class="bi bi-search fs-2 text-info mb-3"></i>
+										<h4 class="fw-bold mb-2">Full-text</h4>
+										<p class="text-info fw-medium mb-0">Recherche</p>
 									</div>
 								</div>
 							</div>
 						</div>
 
-						<div class="mt-5">
-							<h3>🚀 Prochaines étapes</h3>
-							<ul class="list-group">
-								<li class="list-group-item">✅ Backend Spring Boot OK</li>
-								<li class="list-group-item">✅ Frontend Thymeleaf/Bootstrap OK</li>
-								<li class="list-group-item">⏳ Créer entité User</li>
-								<li class="list-group-item">⏳ WebSocket Chat</li>
-							</ul>
+						<!-- ACTIONS PRINCIPALES -->
+						<div class="row g-4 justify-content-center">
+							<div class="col-md-4">
+								<a th:href="@{/employee/login}" class="btn btn-success btn-lg w-100 py-4 shadow-lg">
+									<i class="bi bi-person-badge fs-3 d-block mb-2"></i>
+									Connexion Employé
+								</a>
+							</div>
+							<div class="col-md-4">
+								<a th:href="@{/register}" class="btn btn-primary btn-lg w-100 py-4 shadow-lg">
+									<i class="bi bi-person-plus fs-3 d-block mb-2"></i>
+									S'inscrire
+								</a>
+							</div>
+							<div class="col-md-4">
+								<a th:href="@{/admin/login}"
+									class="btn btn-warning btn-lg w-100 py-4 shadow-lg text-dark">
+									<i class="bi bi-shield-check fs-3 d-block mb-2"></i>
+									Admin RH
+								</a>
+							</div>
+						</div>
+
+						<!-- STATUT SYSTÈME -->
+						<div class="row mt-5">
+							<div class="col-12">
+								<div class="card shadow border-0">
+									<div class="card-header bg-light border-0">
+										<h5 class="mb-0 fw-bold">
+											<i class="bi bi-cpu me-2 text-success"></i>Statut système
+										</h5>
+									</div>
+									<div class="card-body">
+										<div class="row g-3">
+											<div class="col-md-6">
+												<div class="d-flex align-items-center">
+													<i class="bi bi-check-circle-fill text-success me-3 fs-5"></i>
+													<div>Backend Spring Boot OK</div>
+												</div>
+											</div>
+											<div class="col-md-6">
+												<div class="d-flex align-items-center">
+													<i class="bi bi-check-circle-fill text-success me-3 fs-5"></i>
+													<div>Frontend Thymeleaf OK</div>
+												</div>
+											</div>
+											<div class="col-md-6">
+												<div class="d-flex align-items-center">
+													<i class="bi bi-check-circle-fill text-success me-3 fs-5"></i>
+													<div>Database H2 OK (<span th:text="${userCount}">0</span> users)
+													</div>
+												</div>
+											</div>
+											<div class="col-md-6">
+												<div class="d-flex align-items-center">
+													<i class="bi bi-gear-fill text-primary me-3 fs-5"></i>
+													<a th:href="@{/admin/login}" class="text-decoration-none">Admin
+														Login</a>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
+
+	<style>
+		.btn-lg {
+			min-height: 52px;
+		}
+
+		.card:hover {
+			transform: translateY(-2px);
+			transition: all 0.2s;
+		}
+	</style>
 
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
