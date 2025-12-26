@@ -31,6 +31,9 @@ public class User {
 	@Column(nullable = false)
 	private String password; // ← AJOUTÉ
 
+	@ManyToOne
+	private Department department;
+
 	// GETTERS
 	public Long getId() {
 		return id;
@@ -119,5 +122,13 @@ public class User {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public Department getDepartment() {
+		return department;
+	}
+
+	public void setDepartment(Department department) {
+		this.department = department;
 	}
 }

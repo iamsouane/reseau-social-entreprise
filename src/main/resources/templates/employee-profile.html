@@ -21,6 +21,9 @@
 				<a th:href="@{/employee/messages}" class="btn btn-outline-light btn-lg px-4 me-2 shadow">
 					<i class="bi bi-chat-dots me-2"></i>Messagerie
 				</a>
+				<a th:href="@{/employee/dashboard}" class="btn btn-outline-light btn-lg px-4 me-2 shadow">
+					<i class="bi bi-house-door me-2"></i>Dashboard
+				</a>
 				<a th:href="@{/employee/logout}" class="btn btn-outline-light btn-lg px-4 shadow">
 					<i class="bi bi-box-arrow-right me-2"></i>Déconnexion
 				</a>
@@ -43,8 +46,13 @@
 							<div class="col-md-8">
 								<h4 class="fw-bold mb-2" th:text="${user.prenom + ' ' + user.nom}">Prénom Nom</h4>
 								<p class="text-primary fs-6 mb-1" th:text="${user.email}">email@entreprise.com</p>
+								<!-- ✅ DÉPARTEMENT AJOUTÉ -->
+								<p class="text-success fs-6 mb-2">
+									<i class="bi bi-building me-2"></i>
+									<span th:text="${user.department?.nom ?: 'Non assigné'}">Développement</span>
+								</p>
 								<p class="text-muted fs-6 mb-3" th:text="${user.poste}">Poste actuel</p>
-								<p class="lead" th:text="${user.bio}">Bio / Description...</p>
+								<p class="lead" th:text="${user.bio ?: 'Aucune bio'}">Bio / Description...</p>
 							</div>
 							<div class="col-md-4 text-center">
 								<span th:if="${user.actif}" class="badge bg-success fs-5 px-4 py-3">Actif</span>
@@ -91,6 +99,15 @@
 								<input type="text" th:field="*{poste}" class="form-control form-control-lg"
 									placeholder="Développeur Frontend...">
 							</div>
+							<!-- ✅ DÉPARTEMENT INFO (NON MODIFIABLE) -->
+							<div class="mb-5">
+								<label class="form-label fw-bold fs-6 mb-2">Département</label>
+								<p class="form-control-plaintext p-3 bg-light rounded border">
+									<i class="bi bi-building me-2 text-success"></i>
+									<span th:text="${user.department?.nom ?: 'Non assigné'}">Développement</span>
+									<span class="badge bg-secondary ms-2">(Admin seulement)</span>
+								</p>
+							</div>
 							<div class="mb-5">
 								<label class="form-label fw-bold fs-6 mb-2">Bio</label>
 								<textarea th:field="*{bio}" class="form-control" rows="4"
@@ -135,7 +152,6 @@
 			document.getElementById('viewMode').style.display = 'none';
 			document.getElementById('editMode').style.display = 'block';
 		});
-
 		document.getElementById('cancelBtn').addEventListener('click', function () {
 			document.getElementById('editMode').style.display = 'none';
 			document.getElementById('viewMode').style.display = 'block';

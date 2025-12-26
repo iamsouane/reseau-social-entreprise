@@ -4,6 +4,10 @@ import com.entreprise.reseaum.dto.UserLogin;
 import com.entreprise.reseaum.dto.UserRegister;
 import com.entreprise.reseaum.model.Message;
 import com.entreprise.reseaum.model.User;
+import com.entreprise.reseaum.model.Department;
+import com.entreprise.reseaum.model.Announcement;
+import com.entreprise.reseaum.repository.AnnouncementRepository;
+import com.entreprise.reseaum.repository.DepartmentRepository;
 import com.entreprise.reseaum.repository.MessageRepository;
 import com.entreprise.reseaum.repository.UserRepository;
 
@@ -13,6 +17,7 @@ import jakarta.validation.Valid;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +33,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class HomeController {
@@ -37,6 +43,12 @@ public class HomeController {
 
 	@Autowired
 	private MessageRepository messageRepository;
+
+	@Autowired
+	private DepartmentRepository departmentRepository;
+
+	@Autowired
+	private AnnouncementRepository announcementRepository;
 
 	@GetMapping("/")
 	public String home(Model model) {
@@ -73,6 +85,87 @@ public class HomeController {
 		return "register";
 	}
 
+	// ========== ADMIN RH ==========
+	@GetMapping("/admin/login")
+	public String adminLogin(Model model) {
+		model.addAttribute("login", new UserLogin());
+		return "admin-login";
+	}
+
+	@PostMapping("/admin/login")
+	public String processAdminLogin(@ModelAttribute UserLogin login, Model model, HttpSession session) {
+		// admin@rh.com / admin123
+		if ("admin@rh.com".equals(login.getEmail()) && "admin123".equals(login.getPassword())) {
+			User adminUser = new User();
+			adminUser.setId(0L);
+			adminUser.setPrenom("Admin");
+			adminUser.setNom("RH");
+			adminUser.setEmail("admin@rh.com");
+			adminUser.setRole("ADMIN");
+			session.setAttribute("admin", adminUser);
+			return "redirect:/admin/dashboard";
+		}
+		model.addAttribute("error", "Identifiants incorrects (admin@rh.com / admin123)");
+		model.addAttribute("login", login);
+		return "admin-login";
+	}
+
+	@GetMapping("/admin/dashboard")
+	@Transactional
+	public String adminDashboard(HttpSession session, Model model) {
+		User admin = (User) session.getAttribute("admin");
+		if (admin == null)
+			return "redirect:/admin/login";
+
+		// Employés en attente validation
+		List<User> pendingUsers = userRepository.findAll().stream().filter(u -> !u.isActif())
+				.collect(Collectors.toList());
+
+		List<Department> departments = departmentRepository.findAll();
+		List<Announcement> recentAnnonces = announcementRepository.findTop5ByOrderByDatePublicationDesc();
+
+		model.addAttribute("pendingUsers", pendingUsers);
+		model.addAttribute("departments", departments);
+		model.addAttribute("annonces", recentAnnonces);
+		model.addAttribute("admin", admin);
+		return "admin-dashboard";
+	}
+
+	@PostMapping("/admin/validate/{userId}/{departmentId}")
+	@Transactional
+	public String validateUser(@PathVariable Long userId, @PathVariable Long departmentId, HttpSession session) {
+		User user = userRepository.findById(userId).orElse(null);
+		Department dept = departmentRepository.findById(departmentId).orElse(null);
+		if (user != null && !user.isActif() && dept != null) {
+			user.setActif(true);
+			user.setDepartment(dept);
+			userRepository.save(user);
+		}
+		return "redirect:/admin/dashboard";
+	}
+
+	@PostMapping("/admin/announce")
+	@Transactional
+	public String createAnnouncement(@RequestParam String titre, @RequestParam String contenu,
+			@RequestParam(required = false) Long departmentId, HttpSession session) {
+		Announcement annonce = new Announcement();
+		annonce.setTitre(titre);
+		annonce.setContenu(contenu);
+		if (departmentId != null) {
+			Department dept = departmentRepository.findById(departmentId).orElse(null);
+			annonce.setDepartment(dept);
+		}
+		announcementRepository.save(annonce);
+		return "redirect:/admin/dashboard";
+	}
+
+	@GetMapping("/admin/logout")
+	public String adminLogout(HttpSession session) {
+		session.removeAttribute("admin");
+		return "redirect:/";
+	}
+
+	// ========== EMPLOYÉ ==========
 	@GetMapping("/employee/login")
 	public String employeeLogin(Model model) {
 		model.addAttribute("login", new UserLogin());
@@ -89,7 +182,7 @@ public class HomeController {
 			return "employee-login";
 		}
 		session.setAttribute("employee", user);
-		return "redirect:/employee/profile";
+		return "redirect:/employee/dashboard";
 	}
 
 	@GetMapping("/employee/profile")
@@ -101,6 +194,61 @@ public class HomeController {
 		return "employee-profile";
 	}
 
+	@PostMapping("/employee/profile/update")
+	@Transactional
+	public String updateProfile(@Valid @ModelAttribute User user, BindingResult result, HttpSession session,
+			Model model, RedirectAttributes redirectAttributes) {
+
+		if (result.hasErrors()) {
+			User sessionUser = (User) session.getAttribute("employee");
+			model.addAttribute("user", sessionUser);
+			return "employee-profile";
+		}
+
+		User sessionUser = (User) session.getAttribute("employee");
+		if (sessionUser != null && sessionUser.getId().equals(user.getId())) {
+			// ✅ Mise à jour autorisée (même utilisateur)
+			user.setId(sessionUser.getId());
+			user.setEmail(sessionUser.getEmail()); // Email fixe
+			user.setPassword(sessionUser.getPassword()); // Password fixe
+			user.setRole(sessionUser.getRole()); // Role fixe
+			user.setActif(sessionUser.isActif()); // Statut fixe
+
+			userRepository.save(user);
+			session.setAttribute("employee", user); // ✅ Refresh session
+			redirectAttributes.addFlashAttribute("success", "✅ Profil mis à jour !");
+		}
+
+		return "redirect:/employee/profile";
+	}
+
+	@GetMapping("/employee/dashboard")
+	@Transactional(readOnly = true)
+	public String employeeDashboard(HttpSession session, Model model) {
+		User employee = (User) session.getAttribute("employee");
+		if (employee == null)
+			return "redirect:/employee/login";
+
+		int nonLusCount = messageRepository.findByReceiverAndLuFalseOrderByDateDesc(employee).size();
+		List<Announcement> annonces = announcementRepository.findTop5ByOrderByDatePublicationDesc();
+
+		// ✅ DÉPARTEMENTS + COMPTAGE RÉEL
+		List<Department> departments = departmentRepository.findAll();
+		Map<Long, Long> deptEmployeeCount = new HashMap<>();
+
+		for (Department dept : departments) {
+			long count = userRepository.countByDepartmentId(dept.getId());
+			deptEmployeeCount.put(dept.getId(), count);
+		}
+
+		model.addAttribute("user", employee);
+		model.addAttribute("nonLusCount", nonLusCount);
+		model.addAttribute("annonces", annonces);
+		model.addAttribute("departments", departments);
+		model.addAttribute("deptEmployeeCount", deptEmployeeCount); // ✅ Pour Thymeleaf
+		return "employee-dashboard";
+	}
+
 	@GetMapping("/employee/logout")
 	public String employeeLogout(HttpSession session) {
 		session.removeAttribute("employee");
@@ -108,16 +256,13 @@ public class HomeController {
 	}
 
 	@GetMapping("/employee/messages")
-	@Transactional
+	@Transactional(readOnly = true)
 	public String employeeMessages(HttpSession session, Model model) {
 		User employee = (User) session.getAttribute("employee");
 		if (employee == null)
 			return "redirect:/employee/login";
 
-		// Conversations existantes
 		List<User> conversations = getConversationsWithMessages(employee);
-
-		// NON LUS PAR CONTACT ✅
 		Map<Long, List<Message>> nonLusParContact = new HashMap<>();
 		List<Message> tousNonLus = messageRepository.findByReceiverAndLuFalseOrderByDateDesc(employee);
 
@@ -127,7 +272,6 @@ public class HomeController {
 		}
 
 		int nonLusCount = tousNonLus.size();
-
 		List<User> allEmployees = userRepository.findAll().stream().filter(u -> "EMPLOYEE".equals(u.getRole()))
 				.filter(User::isActif).filter(u -> !u.getId().equals(employee.getId())).collect(Collectors.toList());
 
@@ -192,4 +336,32 @@ public class HomeController {
 		}
 		return conversations.stream().distinct().collect(Collectors.toList());
 	}
+
+	@GetMapping("/employee/department/{id}")
+	@Transactional(readOnly = true)
+	public String employeeDepartment(@PathVariable Long id, HttpSession session, Model model) {
+		User employee = (User) session.getAttribute("employee");
+		if (employee == null)
+			return "redirect:/employee/login";
+
+		Department department = departmentRepository.findById(id).orElse(null);
+		if (department == null)
+			return "redirect:/employee/dashboard";
+
+		// ✅ LISTE EMPLOYES DU DÉPARTEMENT (actifs seulement)
+		List<User> employees = userRepository.findByDepartmentId(id).stream().filter(User::isActif)
+				.filter(u -> !"ADMIN".equals(u.getRole())) // Exclut admins
+				.sorted((u1, u2) -> u1.getPrenom().compareToIgnoreCase(u2.getPrenom())).collect(Collectors.toList());
+
+		int nonLusCount = messageRepository.findByReceiverAndLuFalseOrderByDateDesc(employee).size();
+
+		model.addAttribute("user", employee);
+		model.addAttribute("department", department);
+		model.addAttribute("employees", employees);
+		model.addAttribute("nonLusCount", nonLusCount);
+		model.addAttribute("employeeCount", employees.size());
+
+		return "employee-department";
+	}
+
 }
